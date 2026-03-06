@@ -2060,10 +2060,13 @@ function renderFavorites() {
 const _navBar = document.querySelector('.nav-bar');
 const _hamburger = document.querySelector('.hamburger-btn');
 
+let _menuOpenedAt = 0;
+
 function setMenuOpen(open) {
   _navBar.classList.toggle('menu-open', open);
   _hamburger.classList.toggle('open', open);
   _hamburger.setAttribute('aria-expanded', String(open));
+  if (open) _menuOpenedAt = Date.now();
 }
 
 _hamburger.addEventListener('click', () => {
@@ -2075,10 +2078,11 @@ if (window.innerWidth <= 700) {
   setMenuOpen(true);
 }
 
-// Auto-close menu when user scrolls down
+// Auto-close menu when user scrolls down (with cooldown so taps don't instantly close it)
 let _lastScrollY = window.scrollY;
 window.addEventListener('scroll', () => {
   if (window.innerWidth > 700) return;
+  if (Date.now() - _menuOpenedAt < 400) { _lastScrollY = window.scrollY; return; }
   const delta = window.scrollY - _lastScrollY;
   _lastScrollY = window.scrollY;
   if (delta > 10 && _navBar.classList.contains('menu-open')) {
