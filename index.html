@@ -138,6 +138,62 @@ body::before {
 .nav-btn.nav-fav.active { background: #FFD93D; color: #000; border-color: #FFD93D; }
 .nav-btn.nav-fav:hover:not(.active) { background: rgba(255,217,61,0.1); }
 
+/* ============ HAMBURGER (mobile only) ============ */
+.hamburger-btn {
+  display: none;             /* hidden on desktop */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 101;
+}
+.hamburger-icon,
+.hamburger-icon::before,
+.hamburger-icon::after {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--text-main);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+.hamburger-icon::before,
+.hamburger-icon::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 24px;
+}
+.hamburger-icon::before { top: -7px; }
+.hamburger-icon::after  { top:  7px; }
+
+/* Animate to X when open */
+.hamburger-btn.open .hamburger-icon { background: transparent; }
+.hamburger-btn.open .hamburger-icon::before { top: 0; transform: rotate(45deg); }
+.hamburger-btn.open .hamburger-icon::after  { top: 0; transform: rotate(-45deg); }
+
+@media (max-width: 700px) {
+  .hamburger-btn {
+    display: block;
+    align-self: center;
+  }
+  .nav-bar {
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+  }
+  .nav-bar .nav-btn {
+    display: none;            /* collapse by default */
+  }
+  .nav-bar.menu-open .nav-btn {
+    display: inline-flex;     /* show when toggled */
+  }
+  .nav-bar.menu-open {
+    padding-bottom: 0.8rem;
+  }
+}
+
 /* ============ CONTAINER ============ */
 .container {
   max-width: 1100px;
@@ -1407,6 +1463,9 @@ body::before {
 
 <!-- NAV -->
 <div class="nav-bar">
+  <button class="hamburger-btn" aria-label="Toggle menu" aria-expanded="false">
+    <span class="hamburger-icon"></span>
+  </button>
   <button class="nav-btn active" data-page="traits" data-i18n="ui.navTraits"></button>
   <button class="nav-btn" data-page="grid" data-i18n="ui.navGrid"></button>
   <button class="nav-btn" data-page="ladder" data-i18n="ui.navLadder"></button>
@@ -2001,7 +2060,24 @@ function switchToPage(pageName) {
 }
 
 document.querySelectorAll('.nav-btn').forEach(btn => {
-  btn.addEventListener('click', () => switchToPage(btn.dataset.page));
+  btn.addEventListener('click', () => {
+    switchToPage(btn.dataset.page);
+    // Auto-close hamburger menu on mobile after selection
+    const navBar = document.querySelector('.nav-bar');
+    const hamburger = document.querySelector('.hamburger-btn');
+    navBar.classList.remove('menu-open');
+    hamburger.classList.remove('open');
+    hamburger.setAttribute('aria-expanded', 'false');
+  });
+});
+
+// ============ HAMBURGER TOGGLE ============
+document.querySelector('.hamburger-btn').addEventListener('click', () => {
+  const navBar = document.querySelector('.nav-bar');
+  const hamburger = document.querySelector('.hamburger-btn');
+  const isOpen = navBar.classList.toggle('menu-open');
+  hamburger.classList.toggle('open', isOpen);
+  hamburger.setAttribute('aria-expanded', String(isOpen));
 });
 
 // ============ SEARCH ============
