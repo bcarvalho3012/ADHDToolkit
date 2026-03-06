@@ -141,19 +141,27 @@ body::before {
 /* ============ HAMBURGER (mobile only) ============ */
 .hamburger-btn {
   display: none;             /* hidden on desktop */
-  background: transparent;
+  background: var(--accent);
   border: none;
+  border-radius: 8px;
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 0.55rem 0.7rem;
   z-index: 101;
+  box-shadow: 0 0 8px rgba(99,102,241,0.5);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.hamburger-btn:hover,
+.hamburger-btn:active {
+  background: #818cf8;
+  box-shadow: 0 0 14px rgba(99,102,241,0.7);
 }
 .hamburger-icon,
 .hamburger-icon::before,
 .hamburger-icon::after {
   display: block;
-  width: 24px;
-  height: 2px;
-  background: var(--text-main);
+  width: 22px;
+  height: 2.5px;
+  background: #fff;
   border-radius: 2px;
   transition: all 0.3s ease;
   position: relative;
@@ -163,7 +171,7 @@ body::before {
   content: '';
   position: absolute;
   left: 0;
-  width: 24px;
+  width: 22px;
 }
 .hamburger-icon::before { top: -7px; }
 .hamburger-icon::after  { top:  7px; }
@@ -2048,6 +2056,36 @@ function renderFavorites() {
 
 // Note: initial renders are handled by setLanguage() called from initLang()
 
+// ============ HAMBURGER TOGGLE ============
+const _navBar = document.querySelector('.nav-bar');
+const _hamburger = document.querySelector('.hamburger-btn');
+
+function setMenuOpen(open) {
+  _navBar.classList.toggle('menu-open', open);
+  _hamburger.classList.toggle('open', open);
+  _hamburger.setAttribute('aria-expanded', String(open));
+}
+
+_hamburger.addEventListener('click', () => {
+  setMenuOpen(!_navBar.classList.contains('menu-open'));
+});
+
+// Start with menu open on mobile so users see the nav options
+if (window.innerWidth <= 700) {
+  setMenuOpen(true);
+}
+
+// Auto-close menu when user scrolls down
+let _lastScrollY = window.scrollY;
+window.addEventListener('scroll', () => {
+  if (window.innerWidth > 700) return;
+  const delta = window.scrollY - _lastScrollY;
+  _lastScrollY = window.scrollY;
+  if (delta > 10 && _navBar.classList.contains('menu-open')) {
+    setMenuOpen(false);
+  }
+}, { passive: true });
+
 // ============ NAV ============
 function switchToPage(pageName) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -2063,21 +2101,8 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     switchToPage(btn.dataset.page);
     // Auto-close hamburger menu on mobile after selection
-    const navBar = document.querySelector('.nav-bar');
-    const hamburger = document.querySelector('.hamburger-btn');
-    navBar.classList.remove('menu-open');
-    hamburger.classList.remove('open');
-    hamburger.setAttribute('aria-expanded', 'false');
+    setMenuOpen(false);
   });
-});
-
-// ============ HAMBURGER TOGGLE ============
-document.querySelector('.hamburger-btn').addEventListener('click', () => {
-  const navBar = document.querySelector('.nav-bar');
-  const hamburger = document.querySelector('.hamburger-btn');
-  const isOpen = navBar.classList.toggle('menu-open');
-  hamburger.classList.toggle('open', isOpen);
-  hamburger.setAttribute('aria-expanded', String(isOpen));
 });
 
 // ============ SEARCH ============
